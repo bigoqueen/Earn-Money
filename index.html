@@ -12,10 +12,10 @@
     <style>
         :root {
             --font-family: 'Hind Siliguri', 'Poppins', sans-serif;
-            --primary-color: #3730a3;
-            --primary-light: #8b5cf6;
-            --primary-dark: #312e81;
-            --accent-color: #6366f1;
+            --primary-color: #5b21b6;
+            --primary-light: #7c3aed;
+            --primary-dark: #3b0764;
+            --accent-color: #d946ef;
             --facebook-color: #3b5998;
             --instagram-color: #E1306C;
             --gmail-color: #DB4437;
@@ -24,11 +24,11 @@
             --danger-color: #ff4757;
             --warning-color: #ffa502;
             
-            --background-light: #f5f3ff;
+            --background-light: #f6f4ff;
             --surface-light: #ffffff;
-            --text-primary-light: #1a1a1a;
-            --text-secondary-light: #666666;
-            --border-light: rgba(55, 48, 163, 0.2);
+            --text-primary-light: #1e1b3a;
+            --text-secondary-light: #6b6890;
+            --border-light: rgba(91, 33, 182, 0.2);
             --shadow-light: 0 8px 25px rgba(139, 92, 246, 0.15);
             --shadow-dark: 0 10px 30px rgba(0, 0, 0, 0.1);
             
@@ -770,7 +770,7 @@
         .form-control:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(55, 48, 163, 0.3);
+            box-shadow: 0 0 0 3px rgba(91, 33, 182, 0.3);
         }
 
         .action-btn { 
@@ -784,7 +784,7 @@
             transition: all 0.4s ease; 
             background: var(--primary-color); 
             white-space: nowrap; 
-            box-shadow: 0 6px 20px rgba(55, 48, 163, 0.3);
+            box-shadow: 0 6px 20px rgba(91, 33, 182, 0.3);
             position: relative;
             overflow: hidden;
             border: 2px solid transparent;
@@ -811,7 +811,7 @@
 
         .action-btn:hover {
             transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(55, 48, 163, 0.4);
+            box-shadow: 0 12px 25px rgba(91, 33, 182, 0.4);
             background: var(--primary-dark);
             border-color: white;
         }
@@ -1090,7 +1090,7 @@
             padding: 15px;
             border-radius: 15px;
             border: 2px dashed var(--primary-color);
-            background: rgba(55, 48, 163, 0.1);
+            background: rgba(91, 33, 182, 0.1);
             margin: 15px 0;
             font-family: var(--font-family);
             text-align: center;
@@ -1133,8 +1133,8 @@
 
         .withdraw-method.active {
             border-color: var(--primary-color);
-            background: rgba(55, 48, 163, 0.1);
-            box-shadow: 0 8px 20px rgba(55, 48, 163, 0.15);
+            background: rgba(91, 33, 182, 0.1);
+            box-shadow: 0 8px 20px rgba(91, 33, 182, 0.15);
             transform: translateY(-3px);
         }
 
@@ -1202,7 +1202,7 @@
         }
 
         .back-button:hover {
-            background: rgba(55, 48, 163, 0.1);
+            background: rgba(91, 33, 182, 0.1);
             transform: translateX(-5px);
         }
 
@@ -1618,7 +1618,7 @@
 
         .image-upload-box:hover {
             border-color: var(--primary-color);
-            background: rgba(55, 48, 163, 0.05);
+            background: rgba(91, 33, 182, 0.05);
         }
 
         /* অ্যাকাউন্ট অ্যাক্টিভেশন কার্ড */
@@ -1678,7 +1678,7 @@
         
         .payment-method-card.active {
             border-color: var(--primary-color);
-            background: rgba(55, 48, 163, 0.05);
+            background: rgba(91, 33, 182, 0.05);
             transform: translateY(-3px);
             box-shadow: var(--shadow-light);
         }
@@ -2156,6 +2156,78 @@
             z-index: 10;
         }
     </style>
+<style id="theme-polish">
+        /* ===== Earn Money – premium theme polish ===== */
+        body { background: linear-gradient(180deg, #f6f4ff 0%, #efeaff 100%); }
+        #app { background: transparent; box-shadow: 0 0 60px rgba(91, 33, 182, 0.10); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: rgba(124, 58, 237, 0.35); border-radius: 10px; }
+
+        .page.active { animation: emPageIn 0.45s ease both; }
+        @keyframes emPageIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+        .app-header {
+            background:
+                radial-gradient(circle at 85% 0%, rgba(217, 70, 239, 0.55) 0%, rgba(217, 70, 239, 0) 45%),
+                linear-gradient(135deg, #2e1065 0%, #5b21b6 55%, #7c3aed 100%);
+            box-shadow: 0 12px 32px rgba(76, 29, 149, 0.38);
+        }
+        .app-logo { letter-spacing: 0.4px; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25); }
+
+        .profile-header, .referral-hero {
+            background:
+                radial-gradient(circle at 100% 0%, rgba(217, 70, 239, 0.5) 0%, rgba(217, 70, 239, 0) 55%),
+                linear-gradient(135deg, #3b0764 0%, #5b21b6 55%, #7c3aed 100%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 16px 36px rgba(76, 29, 149, 0.30);
+        }
+
+        .stat-card, .task-card, .withdraw-card, .history-card, .micro-job-card, .sell-form-container,
+        .activation-card, .payment-info-box, .task-details-container {
+            border-radius: 22px;
+            border: 1px solid rgba(124, 58, 237, 0.10);
+            box-shadow: 0 10px 28px rgba(91, 33, 182, 0.10);
+            background-color: #ffffff;
+        }
+        .stat-card:hover, .task-card:hover, .micro-job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 18px 36px rgba(91, 33, 182, 0.18);
+            border-color: rgba(217, 70, 239, 0.35);
+        }
+
+        .action-btn, .popup-close-btn {
+            background: linear-gradient(135deg, #7c3aed 0%, #d946ef 100%);
+            box-shadow: 0 8px 22px rgba(124, 58, 237, 0.38);
+            letter-spacing: 0.2px;
+        }
+        .action-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(217, 70, 239, 0.45); }
+        .action-btn:active:not(:disabled) { transform: scale(0.97); }
+        .action-btn:disabled { opacity: 0.6; }
+
+        .form-control:focus, .referral-link-input:focus {
+            outline: none;
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.15);
+        }
+
+        .footer-nav {
+            background: rgba(255, 255, 255, 0.92);
+            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(14px);
+            border-top: 1px solid rgba(124, 58, 237, 0.12);
+            box-shadow: 0 -10px 30px rgba(91, 33, 182, 0.14);
+        }
+        .footer-nav-item.active, .footer-nav-item.active i { color: #7c3aed; }
+
+        .sidebar { background: linear-gradient(180deg, #2e1065 0%, #4c1d95 60%, #5b21b6 100%); }
+
+        .popup-content {
+            border-radius: 28px;
+            border: 1px solid rgba(124, 58, 237, 0.12);
+            box-shadow: 0 24px 60px rgba(46, 16, 101, 0.35);
+        }
+        .progress-bar-fg { background: linear-gradient(90deg, #7c3aed, #d946ef); }
+</style>
 </head>
 <body>
     <!-- সিকিউরিটি ব্যাজ -->
@@ -2865,8 +2937,8 @@
                         <div class="monetag-loading-container" id="monetag-loading">
                             <i class="fas fa-ad monetag-loading"></i>
                             <p>বিজ্ঞাপন লোড হচ্ছে...</p>
-                            <div class="ad-countdown" id="ad-countdown">10</div>
-                            <p class="ad-skip-timer" id="ad-skip-timer">10 সেকেন্ড পরে স্কিপ করা যাবে</p>
+                            <div class="ad-countdown" id="ad-countdown">3</div>
+                            <p class="ad-skip-timer" id="ad-skip-timer">৩ সেকেন্ডের মধ্যে বিজ্ঞাপন শুরু হবে</p>
                         </div>
                         <div id="monetag-ad-frame-container" style="display: none;"></div>
                         <button class="monetag-ad-close" id="monetag-ad-close" style="display: none;">
@@ -3151,11 +3223,12 @@
         let availableMicroJobs = {};
         let currentMicroJob = null;
         let adCountdownInterval = null;
-        let currentAdCountdown = 10;
+        let currentAdCountdown = 3;
         let isAccountActive = false;
         let selectedPaymentMethod = null;
         let monetagAdLoaded = false;
         let monetagAdWatched = false;
+        let lastReferralCount = null;
         
         // DOM Elements
         const popup = document.getElementById('popup');
@@ -3395,6 +3468,21 @@
             userRef.on('value', (snapshot) => {
                 const updatedData = snapshot.val();
                 if (updatedData) {
+                    // Instant notification when someone joins through my referral link
+                    const newRefCount = updatedData.referrals || 0;
+                    if (lastReferralCount !== null && newRefCount > lastReferralCount) {
+                        try { tg.HapticFeedback.notificationOccurred('success'); } catch (e) {}
+                        showPopup(`
+                            <div class="success-message">
+                                <i class="fas fa-user-plus" style="font-size: 48px; color: var(--success); margin-bottom: 15px;"></i>
+                                <h3 style="color: var(--success); margin-bottom: 10px;">অভিনন্দন!</h3>
+                                <p>আপনি একজনকে রেফার করেছেন। মোট রেফার: ${newRefCount} জন।</p>
+                                <button class="popup-close-btn" style="margin-top: 15px;">ঠিক আছে</button>
+                            </div>
+                        `);
+                    }
+                    lastReferralCount = newRefCount;
+                    
                     userState = updatedData;
                     isAccountActive = updatedData.active || false;
                     renderUI();
@@ -4038,7 +4126,7 @@
             }
             
             monetagAdWatched = false;
-            currentAdCountdown = 10;
+            currentAdCountdown = 3;
             
             // Clear any existing iframe
             const existingIframe = frameContainer.querySelector('iframe');
@@ -4524,15 +4612,15 @@
             rewardBtn.style.display = 'none';
             
             // Reset countdown
-            currentAdCountdown = 10;
+            currentAdCountdown = 3;
             countdownEl.textContent = currentAdCountdown;
-            skipTimerEl.textContent = `${currentAdCountdown} সেকেন্ড পরে স্কিপ করা যাবে`;
+            skipTimerEl.textContent = `${currentAdCountdown} সেকেন্ডের মধ্যে বিজ্ঞাপন শুরু হবে`;
             
             // Start countdown
             adCountdownInterval = setInterval(() => {
                 currentAdCountdown--;
                 countdownEl.textContent = currentAdCountdown;
-                skipTimerEl.textContent = `${currentAdCountdown} সেকেন্ড পরে স্কিপ করা যাবে`;
+                skipTimerEl.textContent = `${currentAdCountdown} সেকেন্ডের মধ্যে বিজ্ঞাপন শুরু হবে`;
                 
                 // Add animation every second
                 countdownEl.style.animation = 'none';
