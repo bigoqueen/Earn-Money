@@ -3267,7 +3267,7 @@
                 
             } catch (error) {
                 console.error("Loading error:", error);
-                showError("ডেটা লোড করতে ব্যর্থ হয়েছে। দয়া করে আবার চেষ্টা করুন।");
+                showError("ডেটা লোড করতে ব্যর্থ হয়েছে। দয়া করে আবার চেষ্টা করুন।<br><small style=\"opacity:.8\">" + (error && (error.code || error.message) ? (error.code || error.message) : "") + "</small>");
             }
         }
         
@@ -3291,6 +3291,57 @@
             `;
         }
         
+        // Read referral id from every place Telegram may put it (e.g. "123456" or "ref_123456")
+        function getReferralId() {
+            let raw = null;
+            try {
+                raw = tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param;
+                if (!raw) {
+                    const hp = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+                    raw = hp.get('tgWebAppStartParam');
+                }
+                if (!raw) {
+                    const qp = new URLSearchParams(location.search || '');
+                    raw = qp.get('tgWebAppStartParam') || qp.get('startapp') || qp.get('start');
+                }
+            } catch (e) { console.warn("Referral param read failed:", e); }
+            if (!raw) return null;
+            const m = String(raw).match(/(\d{5,})/);
+            return m ? parseInt(m[1], 10) : null;
+        }
+
+        // Add +1 to the referrer's count and store the pending bonus (once per referred user)
+        async function creditReferral(userRef, userData) {
+            const referralId = userData.referredBy;
+            if (!referralId || referralId == tgUser.id) return;
+            try {
+                const referrerRef = db.ref(`users/${referralId}`);
+                const referrerSnap = await referrerRef.once('value');
+                if (!referrerSnap.val()) {
+                    console.warn("Referrer not found in database:", referralId);
+                    await userRef.update({ referralStatus: 'referrer_not_found' });
+                    return;
+                }
+                await referrerRef.child('referrals').transaction(function (c) { return (c || 0) + 1; });
+                
+                const pendingRefId = db.ref().child('pendingReferrals').push().key;
+                await db.ref(`pendingReferrals/${pendingRefId}`).set({
+                    id: pendingRefId,
+                    referrerId: referralId,
+                    refereeId: tgUser.id,
+                    refereeName: `${userData.firstName || ''} ${userData.lastName || ''}`.trim(),
+                    bonusAmount: appConfig.referralBonus || 0,
+                    status: 'pending',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+                await userRef.update({ referralCounted: true, referralStatus: 'counted' });
+                userData.referralCounted = true;
+            } catch (e) {
+                console.error("Referral credit failed:", e);
+                try { await userRef.update({ referralStatus: 'error: ' + (e.code || e.message) }); } catch (_) {}
+            }
+        }
+        
         // Load user data from Firebase
         async function loadUserData() {
             const userRef = db.ref(`users/${tgUser.id}`);
@@ -3298,8 +3349,7 @@
             let userData = snapshot.val();
             
             if (!userData) {
-                const startParam = tg.initDataUnsafe.start_param;
-                const referralId = (startParam && !isNaN(startParam)) ? parseInt(startParam) : null;
+                const referralId = getReferralId();
                 
                 userData = { 
                     id: tgUser.id, 
@@ -3323,30 +3373,11 @@
                 };
                 await userRef.set(userData);
                 
-                // Handle referral - check if referrer exists and is active
-                if (referralId && referralId != tgUser.id) {
-                    const referrerRef = db.ref(`users/${referralId}`);
-                    const referrerSnap = await referrerRef.once('value');
-                    const referrerData = referrerSnap.val();
-                    
-                    if (referrerData) {
-                        // Only add to referrals count, bonus will be given when user activates account
-                        await referrerRef.child('referrals').set(firebase.database.ServerValue.increment(1));
-                        
-                        // Store pending referral bonus
-                        const pendingRefId = db.ref().child('pendingReferrals').push().key;
-                        const pendingRefData = {
-                            id: pendingRefId,
-                            referrerId: referralId,
-                            refereeId: tgUser.id,
-                            refereeName: `${userData.firstName} ${userData.lastName}`,
-                            bonusAmount: appConfig.referralBonus || 0,
-                            status: 'pending',
-                            timestamp: firebase.database.ServerValue.TIMESTAMP
-                        };
-                        await db.ref(`pendingReferrals/${pendingRefId}`).set(pendingRefData);
-                    }
-                }
+            }
+            
+            // Credit the referrer (also retries for users whose referral was never counted)
+            if (userData.referredBy && !userData.referralCounted) {
+                await creditReferral(userRef, userData);
             }
             
             // Reset daily ad count if it's a new day
@@ -4470,7 +4501,7 @@
             }
             
             // Get the zone id from config
-            const zoneId = appConfig.monetagZoneId || '10389601';
+            const zoneId = appConfig.monetagZoneId || '12284864';
             
             // Disable the watch button
             const watchBtn = document.getElementById('watch-ad-btn');
@@ -4517,7 +4548,7 @@
             }, 1000);
         }
         
-        // Load Monetag Ad SDK
+        // Load Monetag Ad SDK and show the rewarded ad (reward only after the ad is really watched)
         function loadMonetagAd(zoneId) {
             const loadingContainer = document.getElementById('monetag-loading');
             const frameContainer = document.getElementById('monetag-ad-frame-container');
@@ -4525,72 +4556,53 @@
             const rewardBtn = document.getElementById('monetag-ad-reward');
             const watchBtn = document.getElementById('watch-ad-btn');
             
-            loadingContainer.style.display = 'none';
-            frameContainer.style.display = 'block';
-            closeBtn.style.display = 'flex';
-            rewardBtn.style.display = 'block';
+            // The Monetag SDK draws its own full-screen ad, so keep our loading box visible
+            loadingContainer.style.display = 'flex';
+            frameContainer.style.display = 'none';
+            closeBtn.style.display = 'none';
+            rewardBtn.style.display = 'none';
             
-            // Create Monetag SDK script if not already loaded
-            if (!monetagAdLoaded) {
+            if (watchBtn) {
+                watchBtn.innerHTML = '<i class="fas fa-eye"></i> বিজ্ঞাপন দেখা হচ্ছে...';
+            }
+            
+            const fnName = `show_${zoneId}`;
+            
+            const failAd = (err) => {
+                console.error('Monetag ad failed:', err);
+                tg.showAlert('বিজ্ঞাপন দেখানো যায়নি। দয়া করে কিছুক্ষণ পরে আবার চেষ্টা করুন।');
+                resetMonetagAd();
+            };
+            
+            const runAd = () => {
+                const showAd = window[fnName];
+                if (typeof showAd !== 'function') {
+                    failAd('SDK function ' + fnName + ' not found');
+                    return;
+                }
+                try {
+                    Promise.resolve(showAd())
+                        .then(() => completeAdWatch())   // reward only when the ad was watched
+                        .catch(failAd);
+                } catch (e) {
+                    failAd(e);
+                }
+            };
+            
+            if (typeof window[fnName] === 'function') {
+                runAd();
+            } else {
                 const script = document.createElement('script');
                 script.src = '//libtl.com/sdk.js';
                 script.setAttribute('data-zone', zoneId);
-                script.setAttribute('data-sdk', `show_${zoneId}`);
+                script.setAttribute('data-sdk', fnName);
                 script.async = true;
-                
                 script.onload = () => {
-                    console.log('Monetag SDK loaded successfully');
                     monetagAdLoaded = true;
-                    
-                    // Create iframe for the ad
-                    const iframe = document.createElement('iframe');
-                    iframe.className = 'monetag-ad-frame';
-                    iframe.src = `https://libtl.com/show.html?zone=${zoneId}&sdk=show_${zoneId}`;
-                    iframe.style.width = '100%';
-                    iframe.style.height = '100%';
-                    iframe.style.border = 'none';
-                    
-                    frameContainer.innerHTML = '';
-                    frameContainer.appendChild(iframe);
-                    
-                    // Simulate ad watching for 30 seconds
-                    setTimeout(() => {
-                        if (!monetagAdWatched) {
-                            completeAdWatch();
-                        }
-                    }, 30000); // 30 seconds for ad completion
+                    runAd();
                 };
-                
-                script.onerror = () => {
-                    console.error('Failed to load Monetag SDK');
-                    tg.showAlert('বিজ্ঞাপন লোড করা যায়নি। দয়া করে আবার চেষ্টা করুন।');
-                    resetMonetagAd();
-                };
-                
+                script.onerror = () => failAd('Failed to load Monetag SDK');
                 document.head.appendChild(script);
-            } else {
-                // SDK already loaded, create iframe directly
-                const iframe = document.createElement('iframe');
-                iframe.className = 'monetag-ad-frame';
-                iframe.src = `https://libtl.com/show.html?zone=${zoneId}&sdk=show_${zoneId}`;
-                iframe.style.width = '100%';
-                iframe.style.height = '100%';
-                iframe.style.border = 'none';
-                
-                frameContainer.innerHTML = '';
-                frameContainer.appendChild(iframe);
-                
-                // Simulate ad watching for 30 seconds
-                setTimeout(() => {
-                    if (!monetagAdWatched) {
-                        completeAdWatch();
-                    }
-                }, 30000); // 30 seconds for ad completion
-            }
-            
-            // Update button text
-            if (watchBtn) {
-                watchBtn.innerHTML = '<i class="fas fa-eye"></i> বিজ্ঞাপন দেখা হচ্ছে...';
             }
         }
         
